@@ -55,6 +55,9 @@
 ;; Better y/n
 (defalias 'yes-or-no-p 'y-or-n-p)
 
+;; Kill current buffer without prompt
+(global-set-key (kbd "C-x k") 'kill-this-buffer)
+
 ;; Font
 (set-face-attribute 'default nil
 		    :family "Iosevka"
