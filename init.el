@@ -123,6 +123,11 @@
 (use-package magit
   :bind (("C-c g" . magit)))
 
+;; Window numbering
+(use-package winum
+  :config
+  (winum-mode))
+
 ;;;; PROGRAMMING LANGUAGES
 
 ;; Web-mode
@@ -147,7 +152,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (web-mode magit doom-modeline flycheck-color-mode-line flycheck-pos-tip flycheck-elm exec-path-from-shell flycheck elm-mode helm-projectile projectile helm color-theme-sanityinc-tomorrow use-package))))
+    (winum web-mode magit doom-modeline flycheck-color-mode-line flycheck-pos-tip flycheck-elm exec-path-from-shell flycheck elm-mode helm-projectile projectile helm color-theme-sanityinc-tomorrow use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
