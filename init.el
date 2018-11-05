@@ -93,6 +93,9 @@
   :config
   (helm-projectile-on))
 
+;; Using Silver Searchger for search within a project
+(use-package helm-ag)
+
 ;; Line numbers
 (require 'display-line-numbers)
 (setq display-line-numbers-type 'relative)
@@ -164,7 +167,6 @@
 ;; Better RET
 (define-key global-map (kbd "RET") 'newline-and-indent)
 
-
 ;; Elm langauge
 (use-package elm-mode
   :config
@@ -179,9 +181,24 @@
   :init
   (add-hook 'elixir-mode-hook (lambda () (add-hook 'before-save-hook 'elixir-format nil t))))
 
-
 (use-package alchemist
   :after (elixir-mode))
+
+;; Much better commenting
+(use-package evil-nerd-commenter
+  :config
+  (evilnc-default-hotkeys))
+
+;; Trim whitespaces on save
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+;; Snippets
+(use-package yasnippet
+  :config
+  (yas-global-mode 1))
+
+(use-package yasnippet-snippets
+  :after (yasnippet))
 
 ;;;; CUSTOM FILE
 
@@ -192,7 +209,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (alchemist winum web-mode magit doom-modeline flycheck-color-mode-line flycheck-pos-tip flycheck-elm exec-path-from-shell flycheck elm-mode helm-projectile projectile helm color-theme-sanityinc-tomorrow use-package))))
+    (yasnippet-snippets yasnippet helm-ag evil-nerd-commenter com-css-sort smartparens alchemist winum web-mode magit doom-modeline flycheck-color-mode-line flycheck-pos-tip flycheck-elm exec-path-from-shell flycheck elm-mode helm-projectile projectile helm color-theme-sanityinc-tomorrow use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
