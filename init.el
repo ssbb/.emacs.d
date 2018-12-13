@@ -12,17 +12,27 @@
 ;;; Code:
 
 
+;;
+;;; User Info
+;;
+
 (setq user-full-name "Sviatoslav Bulbakha"
       user-mail-address "mail@ssbb.me")
 
-;; Package Management
+;;
+;;; Package Management
+;;
+
 (require 'package)
 (add-to-list 'package-archives
              '("melpa" . "http://melpa.milkbox.net/packages/") t)
 (package-initialize)
 
 
-;; Bootstrap `use-package'
+;;
+;;; Bootstrap `use-package'
+;;
+
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
@@ -31,18 +41,21 @@
   (require 'use-package)
   (setq use-package-always-ensure t))
 
-;; Splash Screen
+;;
+;;; User interface
+;;
+
+;; disable splash screen
 (setq inhibit-startup-message t
       inhibit-default-init t
       initial-scratch-message nil)
 
 ;; Disable audio bell
- (setq ring-bell-function 'ignore)
+(setq ring-bell-function 'ignore)
 
 ;; Scroll bar, Tool bar, Menu bar
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
-(menu-bar-mode -1)
 
 ;; Use system PATH
 (use-package exec-path-from-shell
@@ -69,6 +82,10 @@
 (use-package color-theme-sanityinc-tomorrow
   :config
   (load-theme 'sanityinc-tomorrow-night t))
+
+;; (add-to-list 'default-frame-alist '(ns-appearance . dark))
+(add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+
 
 ;; Helm
 (use-package helm
@@ -100,6 +117,13 @@
 (require 'display-line-numbers)
 (setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode)
+
+;; No Tabs
+(setq-default indent-tabs-mode nil)
+
+;; Expand region
+(use-package expand-region
+  :bind (("C-=" . er/expand-region)))
 
 ;; Highlight parens
 (require 'paren)
@@ -154,11 +178,16 @@
 
 ;; Web-mode
 (use-package web-mode
-  :mode "\\.html\\'"
+  :mode ("\\.html\\'" "\\.eex\\'")
   :config
+  (setq web-mode-engines-alist
+        '(("django"    . "\\.html\\'")))
+
   (setq web-mode-markup-indent-offset 2
 	web-mode-css-indent-offset 2
-	web-mode-code-indent-offset 2))
+	web-mode-code-indent-offset 2)
+
+  (add-to-list 'auto-mode-alist '("\\.html.eex\\'" . web-mode)))
 
 ;; CSS & JS indent
 (setq js-indent-level 2)
@@ -181,6 +210,10 @@
   :init
   (add-hook 'elixir-mode-hook (lambda () (add-hook 'before-save-hook 'elixir-format nil t))))
 
+(use-package flycheck-mix
+  :config
+  (flycheck-mix-setup))
+
 (use-package alchemist
   :after (elixir-mode))
 
@@ -200,6 +233,35 @@
 (use-package yasnippet-snippets
   :after (yasnippet))
 
+(global-subword-mode 1)
+
+;; Python setup
+(use-package elpy
+  :config
+  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+  (add-hook 'elpy-mode-hook 'flycheck-mode)
+  (elpy-enable))
+
+(use-package py-autopep8
+  :hook (elpy-mode . py-autopep8-enable-on-save))
+
+(use-package flycheck-pycheckers
+  :after (flycheck)
+  (with-eval-after-load 'flycheck
+    (add-hook 'flycheck-mode-hook #'flycheck-pycheckers-setup)))
+
+(use-package keyfreq
+  :config
+  (keyfreq-mode 1)
+  (keyfreq-autosave-mode 1))
+
+(use-package emmet-mode
+  :hook (web-mode . emmet-mode))
+
+(use-package undo-tree
+  :config
+  (global-undo-tree-mode))
+
 ;;;; CUSTOM FILE
 
 (custom-set-variables
@@ -209,7 +271,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (yasnippet-snippets yasnippet helm-ag evil-nerd-commenter com-css-sort smartparens alchemist winum web-mode magit doom-modeline flycheck-color-mode-line flycheck-pos-tip flycheck-elm exec-path-from-shell flycheck elm-mode helm-projectile projectile helm color-theme-sanityinc-tomorrow use-package))))
+    (flycheck-mix emmet-mode keyfreq flycheck-pycheckers elpy py-autopep8 expand-region yasnippet-snippets yasnippet helm-ag evil-nerd-commenter com-css-sort smartparens alchemist winum web-mode magit doom-modeline flycheck-color-mode-line flycheck-pos-tip flycheck-elm exec-path-from-shell flycheck elm-mode helm-projectile projectile helm color-theme-sanityinc-tomorrow use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
