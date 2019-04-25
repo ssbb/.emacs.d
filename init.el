@@ -83,9 +83,8 @@
   :config
   (load-theme 'sanityinc-tomorrow-night t))
 
-;; (add-to-list 'default-frame-alist '(ns-appearance . dark))
 (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
-
+(add-to-list 'default-frame-alist '(ns-appearance . dark))
 
 ;; Helm
 (use-package helm
@@ -97,21 +96,34 @@
 	 ("C-c r" . helm-recentf))
   :config
   (require 'helm-config)
+  (setq helm-quick-update t)
+  (setq helm-buffers-fuzzy-matching t)
   (helm-mode 1))
 
 ;; Projectile
 (use-package projectile
   :config
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+  (setq projectile-mode-line-function (lambda () (format " P[%s]" (projectile-project-name))))
   (projectile-mode))
 
 ;; Projectile + Helm integration
 (use-package helm-projectile
   :config
+  (setq projectile-enable-caching t)
   (helm-projectile-on))
 
 ;; Using Silver Searchger for search within a project
-(use-package helm-ag)
+(use-package helm-ag
+  :after helm)
+
+(use-package helm-rage
+  :ensure t
+  ;:load-path "/data/home/phaun/development/projects/helm-rage"
+  :defer t
+  :init
+  (define-key global-map (kbd "C-c r") 'helm-rage)
+  :after helm)
 
 ;; Line numbers
 (require 'display-line-numbers)
@@ -197,22 +209,22 @@
 (define-key global-map (kbd "RET") 'newline-and-indent)
 
 ;; Elm langauge
-(use-package elm-mode
-  :config
-  (setq elm-format-on-save t))
+(use-package elm-mode)
 
 (use-package flycheck-elm
   :after (elm-mode flycheck)
-  :hook (flycheck-mode . flycheck-elm-setup))
+  :hook (flycheck-mode . flycheck-elm-setup)
+  :config
+  (add-hook 'css-mode-hook (lambda () (flycheck-mode -1))))
 
 ;; Elixir language
 (use-package elixir-mode
   :init
   (add-hook 'elixir-mode-hook (lambda () (add-hook 'before-save-hook 'elixir-format nil t))))
 
-(use-package flycheck-mix
-  :config
-  (flycheck-mix-setup))
+;; (use-package flycheck-mix
+;;   :config
+;;   (flycheck-mix-setup))
 
 (use-package alchemist
   :after (elixir-mode))
@@ -262,6 +274,55 @@
   :config
   (global-undo-tree-mode))
 
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "WAIT(w@/!)" "|" "DONE(d!)" "CANCELED(c@)")))
+
+(defun org-archive-tasks (state)
+  (interactive "s Enter State: ")
+  (org-map-entries
+   (lambda ()
+     (org-archive-subtree)
+     (setq org-map-continue-from (outline-previous-heading)))
+   (concat "/" state) 'tree))
+
+;; recentf
+(recentf-mode 1)
+(setq-default recent-save-file "~/.emacs.d/recentf")
+
+(use-package yaml-mode)
+
+(use-package pyenv-mode)
+
+(use-package pyenv-mode-auto
+  :after pyenv-mode)
+
+(use-package reason-mode
+  :config
+  (add-hook 'reason-mode-hook (lambda ()
+                                (add-hook 'before-save-hook #'refmt-before-save))))
+
+(use-package rjsx-mode)
+
+(use-package prettier-js
+  :config
+  (add-hook 'js2-mode-hook 'prettier-js-mode)
+  (add-hook 'css-mode-hook 'prettier-js-mode)
+  (add-hook 'elm-mode-hook 'prettier-js-mode)
+  (add-hook 'js-mode-hook 'prettier-js-mode))
+
+(use-package js2-mode
+  :config
+  (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode)))
+
+(use-package haskell-mode
+  :config
+  (add-hook 'haskell-mode-hook (lambda () (flycheck-mode -1))))
+
+(use-package hindent
+  :config
+  (setq hindent-reformat-buffer-on-save t)
+  (add-hook 'haskell-mode-hook #'hindent-mode))
+
 ;;;; CUSTOM FILE
 
 (custom-set-variables
@@ -269,9 +330,12 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(flycheck-sass-executable "/Users/ssbb/.gems/bin/scss")
+ '(flycheck-sass/scss-sass-lint-executable "/Users/ssbb/.gems/bin/scss")
  '(package-selected-packages
    (quote
-    (flycheck-mix emmet-mode keyfreq flycheck-pycheckers elpy py-autopep8 expand-region yasnippet-snippets yasnippet helm-ag evil-nerd-commenter com-css-sort smartparens alchemist winum web-mode magit doom-modeline flycheck-color-mode-line flycheck-pos-tip flycheck-elm exec-path-from-shell flycheck elm-mode helm-projectile projectile helm color-theme-sanityinc-tomorrow use-package))))
+    (hindent flycheck-haskell haskell-mode prettier-js rjsx-mode reason-mode sqlformat sql-indent pyenv-mode yaml-mode helm-rage flycheck-mix emmet-mode keyfreq flycheck-pycheckers elpy py-autopep8 expand-region yasnippet-snippets yasnippet helm-ag evil-nerd-commenter com-css-sort smartparens alchemist winum web-mode magit doom-modeline flycheck-color-mode-line flycheck-pos-tip flycheck-elm exec-path-from-shell flycheck elm-mode helm-projectile projectile helm color-theme-sanityinc-tomorrow use-package)))
+ '(sqlformat-command (quote pgformatter)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
