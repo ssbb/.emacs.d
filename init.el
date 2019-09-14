@@ -41,8 +41,9 @@
   (require 'use-package)
   (setq use-package-always-ensure t))
 
+
 ;;
-;;; User interface
+;;; UI
 ;;
 
 ;; disable splash screen
@@ -50,26 +51,34 @@
       inhibit-default-init t
       initial-scratch-message nil)
 
+
 ;; Disable audio bell
 (setq ring-bell-function 'ignore)
+
 
 ;; Scroll bar, Tool bar, Menu bar
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
+
 
 ;; Use system PATH
 (use-package exec-path-from-shell
   :config
   (exec-path-from-shell-initialize))
 
-;; Backup
+
+;; Disable backup
 (setq make-backup-files nil)
+(setq create-lockfiles nil)
+
 
 ;; Better y/n
 (defalias 'yes-or-no-p 'y-or-n-p)
 
+
 ;; Kill current buffer without prompt
 (global-set-key (kbd "C-x k") 'kill-this-buffer)
+
 
 ;; Font
 (set-face-attribute 'default nil
@@ -78,6 +87,7 @@
 		    :weight 'normal
 		    :width 'normal)
 
+
 ;; Theme
 (use-package color-theme-sanityinc-tomorrow
   :config
@@ -85,6 +95,9 @@
 
 (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
 (add-to-list 'default-frame-alist '(ns-appearance . dark))
+(add-to-list 'default-frame-alist '(height . 35))
+(add-to-list 'default-frame-alist '(width . 130))
+
 
 ;; Helm
 (use-package helm
@@ -159,7 +172,8 @@
 
 ;; Modeline
 (use-package doom-modeline
-  :hook (after-init . doom-modeline-init))
+  :ensure t
+  :hook (after-init . doom-modeline-mode))
 
 ;; Magit
 (use-package magit
@@ -218,16 +232,17 @@
   (add-hook 'css-mode-hook (lambda () (flycheck-mode -1))))
 
 ;; Elixir language
-(use-package elixir-mode
-  :init
-  (add-hook 'elixir-mode-hook (lambda () (add-hook 'before-save-hook 'elixir-format nil t))))
+(use-package elixir-mode)
+  ;; :init
+  ;; (add-hook 'elixir-mode-hook (lambda () (add-hook 'before-save-hook 'elixir-format nil t))))
 
-;; (use-package flycheck-mix
-;;   :config
-;;   (flycheck-mix-setup))
 
-(use-package alchemist
-  :after (elixir-mode))
+;; (use-package alchemist
+;;   :after (elixir-mode))
+
+(eval-after-load "elixir-mode"
+  '(defun elixir-format--mix-executable ()
+     (string-trim-right (shell-command-to-string "asdf which mix"))))
 
 ;; Much better commenting
 (use-package evil-nerd-commenter
@@ -296,10 +311,58 @@
 (use-package pyenv-mode-auto
   :after pyenv-mode)
 
+(defun shell-cmd (cmd)
+  "Returns the stdout output of a shell command or nil if the command returned
+     an error"
+  (car (ignore-errors (apply 'process-lines (split-string cmd)))))
+
 (use-package reason-mode
   :config
+  (let* ((refmt-bin (or (shell-cmd "refmt ----where")
+                        (shell-cmd "which refmt")))
+         (merlin-bin (or (shell-cmd "ocamlmerlin ----where")
+                         (shell-cmd "which ocamlmerlin")))
+         (merlin-base-dir (when merlin-bin
+                            (replace-regexp-in-string "bin/ocamlmerlin$" "" merlin-bin))))
+    ;; Add npm merlin.el to the emacs load path and tell emacs where to find ocamlmerlin
+    (when merlin-bin
+      (add-to-list 'load-path (concat merlin-base-dir "share/emacs/site-lisp/"))
+      (setq merlin-command merlin-bin))
+    (when refmt-bin
+      (setq refmt-command refmt-bin)))
+
   (add-hook 'reason-mode-hook (lambda ()
                                 (add-hook 'before-save-hook #'refmt-before-save))))
+
+(use-package lsp-mode
+  :hook (elm-mode . lsp)
+  :config
+  ;; (setq lsp-elm-diagnostics-on-save-only t)
+  ;; (setq lsp-elm-elm-format-path "/Users/ssbb/.nvm/versions/node/v10.16.0/bin/elm-format")
+  ;; (setq lsp-elm-elm-path "/Users/ssbb/.nvm/versions/node/v10.16.0/bin/elm")
+  (setq lsp-enable-file-watchers nil)
+  (setq lsp-prefer-flymake nil))
+
+(use-package lsp-ui :commands lsp-ui-mode)
+;; (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+(use-package helm-lsp :commands helm-lsp-workspace-symbol)
+(use-package company-lsp
+  :config
+  (push 'company-lsp company-backends))
+
+(use-package company
+  :custom
+  (company-quickhelp-delay 0)
+  (company-tooltip-align-annotations t)
+  :config
+  (company-quickhelp-mode 1)
+  :bind
+  ("M-o" . company-complete))
+
+(use-package company-quickhelp
+  :ensure t
+  :bind (:map company-active-map
+              ("M-h" . company-quickhelp-manual-begin)))
 
 (use-package rjsx-mode)
 
@@ -308,7 +371,10 @@
   (add-hook 'js2-mode-hook 'prettier-js-mode)
   (add-hook 'css-mode-hook 'prettier-js-mode)
   (add-hook 'elm-mode-hook 'prettier-js-mode)
-  (add-hook 'js-mode-hook 'prettier-js-mode))
+  (add-hook 'js-mode-hook 'prettier-js-mode)
+  (add-hook 'typescript-mode-hook 'prettier-js-mode))
+
+(use-package typescript-mode)
 
 (use-package js2-mode
   :config
@@ -323,6 +389,8 @@
   (setq hindent-reformat-buffer-on-save t)
   (add-hook 'haskell-mode-hook #'hindent-mode))
 
+(use-package nginx-mode)
+
 ;;;; CUSTOM FILE
 
 (custom-set-variables
@@ -330,17 +398,25 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(company-quickhelp-delay 0)
+ '(company-tooltip-align-annotations t)
+ '(display-line-numbers-type (quote relative))
  '(flycheck-sass-executable "/Users/ssbb/.gems/bin/scss")
  '(flycheck-sass/scss-sass-lint-executable "/Users/ssbb/.gems/bin/scss")
+ '(global-display-line-numbers-mode t)
+ '(lsp-clients-elixir-server-executable "/Users/ssbb/Sources/elixir-ls/rel/language_server.sh")
+ '(lsp-elm-elm-language-server-path "elm-language-server")
+ '(org-agenda-files (quote ("~/Documents/Org/exr.org")))
  '(package-selected-packages
    (quote
-    (hindent flycheck-haskell haskell-mode prettier-js rjsx-mode reason-mode sqlformat sql-indent pyenv-mode yaml-mode helm-rage flycheck-mix emmet-mode keyfreq flycheck-pycheckers elpy py-autopep8 expand-region yasnippet-snippets yasnippet helm-ag evil-nerd-commenter com-css-sort smartparens alchemist winum web-mode magit doom-modeline flycheck-color-mode-line flycheck-pos-tip flycheck-elm exec-path-from-shell flycheck elm-mode helm-projectile projectile helm color-theme-sanityinc-tomorrow use-package)))
+    (lsp-ui-flycheck helm-lsp lsp-ui nginx-mode typescript-mode lsp-treemacs company-quickhelp company-lsp lsp-mode hindent flycheck-haskell haskell-mode prettier-js rjsx-mode reason-mode sqlformat sql-indent pyenv-mode yaml-mode helm-rage flycheck-mix emmet-mode keyfreq flycheck-pycheckers elpy py-autopep8 expand-region yasnippet-snippets yasnippet helm-ag evil-nerd-commenter com-css-sort smartparens alchemist winum web-mode magit doom-modeline flycheck-color-mode-line flycheck-pos-tip flycheck-elm exec-path-from-shell flycheck elm-mode helm-projectile projectile helm color-theme-sanityinc-tomorrow use-package)))
  '(sqlformat-command (quote pgformatter)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(fringe ((t (:background "#1d1f21" :foreground "#969896"))))
+ '(line-number ((t (:background "#1d1f21" :foreground "#969896")))))
 
 ;;; init.el ends here
