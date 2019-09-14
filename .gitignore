@@ -7,4 +7,4 @@
 projectile.cache
 /transient
 /tutorial
-/\.*
+/.lsp*
