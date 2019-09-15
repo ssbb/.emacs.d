@@ -170,9 +170,9 @@
      (use-package yaml-mode)
    #+END_SRC
 ** Elm
-#+BEGIN_SRC emacs-lisp
-(use-package elm-mode)
-#+END_SRC
+   #+BEGIN_SRC emacs-lisp
+     (use-package elm-mode)
+   #+END_SRC
 * Features
 ** Helm
    #+BEGIN_SRC emacs-lisp
@@ -328,4 +328,9 @@
      (use-package evil-nerd-commenter
        :config
        (evilnc-default-hotkeys))
+   #+END_SRC
+** Rainbow delimiters
+   #+BEGIN_SRC emacs-lisp
+     (use-package rainbow-delimiters
+       :hook prog-mode)
    #+END_SRC
