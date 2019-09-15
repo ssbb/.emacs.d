@@ -6,7 +6,7 @@
 
    #+BEGIN_SRC emacs-lisp
      (setq user-full-name "Sviatoslav Bulbakha"
-	   user-mail-address "mail@ssbb.me")
+           user-mail-address "mail@ssbb.me")
    #+END_SRC
 
 ** Use better defaults
@@ -22,15 +22,17 @@
    #+END_SRC
 
    #+BEGIN_SRC emacs-lisp
-     (setq inhibit-startup-message t
-	   inhibit-default-init t
-	   initial-scratch-message nil
-	   ring-bell-function 'ignore
-	   make-backup-files nil
-	   create-lockfiles nil)
+     (setq-default inhibit-startup-message t
+                   inhibit-default-init t
+                   initial-scratch-message nil
+                   ring-bell-function 'ignore
+                   make-backup-files nil
+                   create-lockfiles nil
+                   indent-tabs-mode nil)
 
      (defalias 'yes-or-no-p 'y-or-n-p)
      (set-default-coding-systems 'utf-8)
+     (global-subword-mode 1)
    #+END_SRC
 
    Garbage-collect on focus-out.
@@ -45,6 +47,18 @@
      (global-set-key (kbd "C-x k") 'kill-this-buffer)
    #+END_SRC
 
+   Indent with RET
+
+   #+BEGIN_SRC emacs-lisp
+     (define-key global-map (kbd "RET") 'newline-and-indent)
+   #+END_SRC
+
+   Trim whitespaces on save
+
+   #+BEGIN_SRC emacs-lisp
+     (add-hook 'before-save-hook 'delete-trailing-whitespace)
+   #+END_SRC
+
 ** Load .custom.el
    #+BEGIN_SRC emacs-lisp
      (setq-default custom-file (expand-file-name ".custom.el" user-emacs-directory))
@@ -54,7 +68,6 @@
 * Theme
   #+BEGIN_SRC emacs-lisp
     (use-package color-theme-sanityinc-tomorrow
-      :demand
       :config
       (load-theme 'sanityinc-tomorrow-night t))
   #+END_SRC
@@ -68,17 +81,17 @@
 
   #+BEGIN_SRC emacs-lisp
     (set-face-attribute 'default nil
-			:family "Iosevka"
-			:height 130
-			:weight 'normal
-			:width 'normal)
+                        :family "Iosevka"
+                        :height 130
+                        :weight 'normal
+                        :width 'normal)
   #+END_SRC
 
 *** Modeline
     #+BEGIN_SRC emacs-lisp
       (use-package doom-modeline
-	:ensure t
-	:hook (after-init . doom-modeline-mode))
+        :ensure t
+        :hook (after-init . doom-modeline-mode))
     #+END_SRC
 
 * Languages
@@ -88,16 +101,28 @@
        :config
        (setq org-src-tab-acts-natively t))
    #+END_SRC
+
+   Useful function to archive all matching tasks.
+
+   #+BEGIN_SRC emacs-lisp
+     (defun org-archive-tasks (state)
+       (interactive "s Enter State: ")
+       (org-map-entries
+        (lambda ()
+          (org-archive-subtree)
+          (setq org-map-continue-from (outline-previous-heading)))
+        (concat "/" state) 'tree))
+   #+END_SRC
 * Features
 ** Helm
    #+BEGIN_SRC emacs-lisp
      (use-package helm
        :bind (("M-x" . helm-M-x)
-	      ("C-x r b" . helm-filtered-bookmarks)
-	      ("C-x C-f" . helm-find-files)
-	      ("M-y" . helm-show-kill-ring)
-	      ("C-x b" . helm-buffers-list)
-	      ("C-c r" . helm-recentf))
+              ("C-x r b" . helm-filtered-bookmarks)
+              ("C-x C-f" . helm-find-files)
+              ("M-y" . helm-show-kill-ring)
+              ("C-x b" . helm-buffers-list)
+              ("C-c r" . helm-recentf))
        :config
        (require 'helm-config)
        (setq helm-quick-update t)
@@ -108,16 +133,16 @@
     #+BEGIN_SRC emacs-lisp
       ;; Using Silver Searchger for search within a project
       (use-package helm-ag
-	:after helm)
+        :after helm)
 
       (use-package helm-projectile
-	:config
-	(setq projectile-enable-caching t)
-	(helm-projectile-on))
+        :config
+        (setq projectile-enable-caching t)
+        (helm-projectile-on))
 
       (use-package helm-rage
-	:init
-	(define-key global-map (kbd "C-c r") 'helm-rage))
+        :init
+        (define-key global-map (kbd "C-c r") 'helm-rage))
     #+END_SRC
 
 ** PATH
@@ -151,22 +176,89 @@
 ** Window numbers
    #+BEGIN_SRC emacs-lisp
      (use-package winum
-       :no-require t
        :config
        (setq winum-keymap
-	     (let ((map (make-sparse-keymap)))
-	       (define-key map (kbd "C-`") 'winum-select-window-by-number)
-	       (define-key map (kbd "C-²") 'winum-select-window-by-number)
-	       (define-key map (kbd "M-0") 'winum-select-window-0-or-10)
-	       (define-key map (kbd "M-1") 'winum-select-window-1)
-	       (define-key map (kbd "M-2") 'winum-select-window-2)
-	       (define-key map (kbd "M-3") 'winum-select-window-3)
-	       (define-key map (kbd "M-4") 'winum-select-window-4)
-	       (define-key map (kbd "M-5") 'winum-select-window-5)
-	       (define-key map (kbd "M-6") 'winum-select-window-6)
-	       (define-key map (kbd "M-7") 'winum-select-window-7)
-	       (define-key map (kbd "M-8") 'winum-select-window-8)
-	       map))
+             (let ((map (make-sparse-keymap)))
+               (define-key map (kbd "C-`") 'winum-select-window-by-number)
+               (define-key map (kbd "C-²") 'winum-select-window-by-number)
+               (define-key map (kbd "M-0") 'winum-select-window-0-or-10)
+               (define-key map (kbd "M-1") 'winum-select-window-1)
+               (define-key map (kbd "M-2") 'winum-select-window-2)
+               (define-key map (kbd "M-3") 'winum-select-window-3)
+               (define-key map (kbd "M-4") 'winum-select-window-4)
+               (define-key map (kbd "M-5") 'winum-select-window-5)
+               (define-key map (kbd "M-6") 'winum-select-window-6)
+               (define-key map (kbd "M-7") 'winum-select-window-7)
+               (define-key map (kbd "M-8") 'winum-select-window-8)
+               map))
        (require 'winum)
        (winum-mode))
+   #+END_SRC
+** Undo Tree
+   #+BEGIN_SRC emacs-lisp
+     (use-package undo-tree
+       :config
+       (global-undo-tree-mode))
+   #+END_SRC
+** Expand region
+   #+BEGIN_SRC emacs-lisp
+     (use-package expand-region
+       :bind (("C-=" . er/expand-region)))
+   #+END_SRC
+** Parens
+   #+BEGIN_SRC emacs-lisp
+     (require 'paren)
+     (setq show-paren-delay 0)
+     (show-paren-mode 1)
+   #+END_SRC
+** Linting
+   #+BEGIN_SRC emacs-lisp
+     (use-package flycheck
+       :config
+       (global-flycheck-mode))
+
+     (use-package flycheck-pos-tip
+       :after (flycheck)
+       :config
+       (with-eval-after-load 'flycheck
+         (flycheck-pos-tip-mode)))
+
+     (use-package flycheck-color-mode-line
+       :after (flycheck)
+       :hook (flycheck-mode . flycheck-color-mode-line-mode))
+   #+END_SRC
+** Snippets
+   #+BEGIN_SRC emacs-lisp
+     (use-package yasnippet
+       :config
+       (yas-global-mode 1))
+
+     (use-package yasnippet-snippets
+       :after (yasnippet))
+   #+END_SRC
+** Auto-completion
+   #+BEGIN_SRC emacs-lisp
+     (use-package company
+       :custom
+       (company-quickhelp-delay 0)
+       (company-tooltip-align-annotations t)
+       :config
+       (company-quickhelp-mode 1)
+       :bind
+       ("M-o" . company-complete))
+
+     (use-package company-quickhelp
+       :ensure t
+       :bind (:map company-active-map
+                   ("M-h" . company-quickhelp-manual-begin)))
+   #+END_SRC
+** Prettier
+   #+BEGIN_SRC emacs-lisp
+     (use-package prettier-js
+       :config
+       (add-hook 'js2-mode-hook 'prettier-js-mode)
+       (add-hook 'css-mode-hook 'prettier-js-mode)
+       (add-hook 'elm-mode-hook 'prettier-js-mode)
+       (add-hook 'js-mode-hook 'prettier-js-mode)
+       (add-hook 'typescript-mode-hook 'prettier-js-mode))
    #+END_SRC

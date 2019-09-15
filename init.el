@@ -27,7 +27,6 @@
     (package-refresh-contents)
     (package-install 'use-package t))
   (setq-default
-   use-package-always-defer t
    use-package-always-ensure t)
 
   ;; Use latest Org
