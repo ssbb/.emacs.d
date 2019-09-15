@@ -329,8 +329,3 @@
        :config
        (evilnc-default-hotkeys))
    #+END_SRC
-** Rainbow delimiters
-   #+BEGIN_SRC emacs-lisp
-     (use-package rainbow-delimiters
-       :hook prog-mode)
-   #+END_SRC
