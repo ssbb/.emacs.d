@@ -113,6 +113,66 @@
           (setq org-map-continue-from (outline-previous-heading)))
         (concat "/" state) 'tree))
    #+END_SRC
+** HTML
+   #+BEGIN_SRC emacs-lisp
+     (use-package web-mode
+       :mode ("\\.html\\'" "\\.eex\\'")
+       :config
+       (setq web-mode-engines-alist
+             '(("django"    . "\\.html\\'")))
+
+       (setq web-mode-markup-indent-offset 2
+             web-mode-css-indent-offset 2
+             web-mode-code-indent-offset 2)
+
+       (add-to-list 'auto-mode-alist '("\\.html.eex\\'" . web-mode)))
+
+     (use-package emmet-mode
+       :hook (web-mode . emmet-mode))
+   #+END_SRC
+** Javascript
+   #+BEGIN_SRC emacs-lisp
+     (use-package js2-mode
+       :mode "\\.js\\'")
+
+     (setq js-indent-level 2)
+   #+END_SRC
+** CSS
+   #+BEGIN_SRC emacs-lisp
+     (setq css-indent-offset 2)
+   #+END_SRC
+** Elixir
+   #+BEGIN_SRC emacs-lisp
+     (use-package elixir-mode)
+
+     (eval-after-load "elixir-mode"
+       '(defun elixir-format--mix-executable ()
+          (string-trim-right (shell-command-to-string "asdf which mix"))))
+   #+END_SRC
+** Python
+   #+BEGIN_SRC emacs-lisp
+     (use-package elpy
+       :config
+       (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+       (add-hook 'elpy-mode-hook 'flycheck-mode)
+       (elpy-enable))
+
+     (use-package py-autopep8
+       :hook (elpy-mode . py-autopep8-enable-on-save))
+
+     (use-package pyenv-mode)
+
+     (use-package pyenv-mode-auto
+       :after pyenv-mode)
+   #+END_SRC
+** YAML
+   #+BEGIN_SRC emacs-lisp
+     (use-package yaml-mode)
+   #+END_SRC
+** Elm
+#+BEGIN_SRC emacs-lisp
+(use-package elm-mode)
+#+END_SRC
 * Features
 ** Helm
    #+BEGIN_SRC emacs-lisp
@@ -176,6 +236,7 @@
 ** Window numbers
    #+BEGIN_SRC emacs-lisp
      (use-package winum
+       :no-require t
        :config
        (setq winum-keymap
              (let ((map (make-sparse-keymap)))
@@ -261,4 +322,10 @@
        (add-hook 'elm-mode-hook 'prettier-js-mode)
        (add-hook 'js-mode-hook 'prettier-js-mode)
        (add-hook 'typescript-mode-hook 'prettier-js-mode))
+   #+END_SRC
+** Comments
+   #+BEGIN_SRC emacs-lisp
+     (use-package evil-nerd-commenter
+       :config
+       (evilnc-default-hotkeys))
    #+END_SRC
