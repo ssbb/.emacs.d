@@ -1,0 +1,143 @@
+#+TITLE: DotEmacs
+#+AUTHOR: Sviatoslav Bulbakha
+
+* Bootstrap
+** User info
+
+   #+BEGIN_SRC emacs-lisp
+     (setq user-full-name "Sviatoslav Bulbakha"
+	   user-mail-address "mail@ssbb.me")
+   #+END_SRC
+
+** Use better defaults
+
+   Cleanup UI a bit.
+
+   #+BEGIN_SRC emacs-lisp
+     (when window-system
+       (blink-cursor-mode 0)
+       (scroll-bar-mode 0)
+       (tool-bar-mode 0)
+       (tooltip-mode 0))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+     (setq inhibit-startup-message t
+	   inhibit-default-init t
+	   initial-scratch-message nil
+	   ring-bell-function 'ignore
+	   make-backup-files nil
+	   create-lockfiles nil)
+
+     (defalias 'yes-or-no-p 'y-or-n-p)
+     (set-default-coding-systems 'utf-8)
+   #+END_SRC
+
+   Garbage-collect on focus-out.
+
+   #+BEGIN_SRC emacs-lisp
+     (add-hook 'focus-out-hook #'garbage-collect)
+   #+END_SRC
+
+   Kill current buffer w/o prompt
+
+   #+BEGIN_SRC emacs-lisp
+     (global-set-key (kbd "C-x k") 'kill-this-buffer)
+   #+END_SRC
+
+** Load .custom.el
+   #+BEGIN_SRC emacs-lisp
+     (setq-default custom-file (expand-file-name ".custom.el" user-emacs-directory))
+     (when (file-exists-p custom-file)
+       (load custom-file))
+   #+END_SRC
+* Theme
+  #+BEGIN_SRC emacs-lisp
+    (use-package color-theme-sanityinc-tomorrow
+      :demand
+      :config
+      (load-theme 'sanityinc-tomorrow-night t))
+  #+END_SRC
+
+  #+BEGIN_SRC emacs-lisp
+    (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+    (add-to-list 'default-frame-alist '(ns-appearance . dark))
+    (add-to-list 'default-frame-alist '(height . 35))
+    (add-to-list 'default-frame-alist '(width . 130))
+  #+END_SRC
+
+  #+BEGIN_SRC emacs-lisp
+    (set-face-attribute 'default nil
+			:family "Iosevka"
+			:height 130
+			:weight 'normal
+			:width 'normal)
+  #+END_SRC
+
+* Languages
+** Org
+   #+BEGIN_SRC emacs-lisp
+     (use-package org
+       :config
+       (setq org-src-tab-acts-natively t))
+   #+END_SRC
+* Features
+** Helm
+   #+BEGIN_SRC emacs-lisp
+     (use-package helm
+       :bind (("M-x" . helm-M-x)
+	      ("C-x r b" . helm-filtered-bookmarks)
+	      ("C-x C-f" . helm-find-files)
+	      ("M-y" . helm-show-kill-ring)
+	      ("C-x b" . helm-buffers-list)
+	      ("C-c r" . helm-recentf))
+       :config
+       (require 'helm-config)
+       (setq helm-quick-update t)
+       (setq helm-buffers-fuzzy-matching t)
+       (helm-mode 1))
+   #+END_SRC
+*** Plugins
+    #+BEGIN_SRC emacs-lisp
+      ;; Using Silver Searchger for search within a project
+      (use-package helm-ag
+	:after helm)
+
+      (use-package helm-projectile
+	:config
+	(setq projectile-enable-caching t)
+	(helm-projectile-on))
+
+      (use-package helm-rage
+	:init
+	(define-key global-map (kbd "C-c r") 'helm-rage))
+    #+END_SRC
+
+** PATH
+   Use system =$PATH=.
+
+   #+BEGIN_SRC emacs-lisp
+     (use-package exec-path-from-shell
+       :config
+       (exec-path-from-shell-initialize))
+   #+END_SRC
+** Projectile
+   #+BEGIN_SRC emacs-lisp
+     (use-package projectile
+       :config
+       (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+       (setq projectile-mode-line-function (lambda () (format " P[%s]" (projectile-project-name))))
+
+       (projectile-mode))
+   #+END_SRC
+** Line numbers
+   #+BEGIN_SRC emacs-lisp
+     (require 'display-line-numbers)
+     (setq display-line-numbers-type 'relative)
+     (global-display-line-numbers-mode)
+   #+END_SRC
+** Magit
+#+BEGIN_SRC emacs-lisp
+(use-package magit
+  :bind (("C-c g" . magit)))
+#+END_SRC
