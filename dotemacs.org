@@ -33,6 +33,7 @@
      (defalias 'yes-or-no-p 'y-or-n-p)
      (set-default-coding-systems 'utf-8)
      (global-subword-mode 1)
+     (cd "~/")
    #+END_SRC
 
    Garbage-collect on focus-out.
@@ -143,7 +144,9 @@
    #+END_SRC
 ** Elixir
    #+BEGIN_SRC emacs-lisp
-     (use-package elixir-mode)
+     (use-package elixir-mode
+       :config
+       (add-hook 'before-save-hook 'lsp-format-buffer))
 
      (eval-after-load "elixir-mode"
        '(defun elixir-format--mix-executable ()
@@ -283,10 +286,6 @@
        :config
        (with-eval-after-load 'flycheck
          (flycheck-pos-tip-mode)))
-
-     (use-package flycheck-color-mode-line
-       :after (flycheck)
-       :hook (flycheck-mode . flycheck-color-mode-line-mode))
    #+END_SRC
 ** Snippets
    #+BEGIN_SRC emacs-lisp
@@ -301,17 +300,59 @@
    #+BEGIN_SRC emacs-lisp
      (use-package company
        :custom
-       (company-quickhelp-delay 0)
        (company-tooltip-align-annotations t)
-       :config
-       (company-quickhelp-mode 1)
        :bind
        ("M-o" . company-complete))
 
-     (use-package company-quickhelp
-       :ensure t
-       :bind (:map company-active-map
-                   ("M-h" . company-quickhelp-manual-begin)))
+     (use-package company-box
+       :hook (company-mode . company-box-mode)
+       :config
+       ;; Prettify icons
+       (defun my-company-box-icons--elisp (candidate)
+         (when (derived-mode-p 'emacs-lisp-mode)
+           (let ((sym (intern candidate)))
+             (cond ((fboundp sym) 'Function)
+                   ((featurep sym) 'Module)
+                   ((facep sym) 'Color)
+                   ((boundp sym) 'Variable)
+                   ((symbolp sym) 'Text)
+                   (t . nil)))))
+       (advice-add #'company-box-icons--elisp :override #'my-company-box-icons--elisp)
+
+       (when (and (display-graphic-p)
+                  (require 'all-the-icons nil t))
+         (declare-function all-the-icons-faicon 'all-the-icons)
+         (declare-function all-the-icons-material 'all-the-icons)
+         (declare-function all-the-icons-octicon 'all-the-icons)
+         (setq company-box-icons-all-the-icons
+               `((Unknown . ,(all-the-icons-material "find_in_page" :height 0.9 :v-adjust -0.2))
+                 (Text . ,(all-the-icons-faicon "text-width" :height 0.85 :v-adjust -0.05))
+                 (Method . ,(all-the-icons-faicon "cube" :height 0.85 :v-adjust -0.05 :face 'all-the-icons-purple))
+                 (Function . ,(all-the-icons-faicon "cube" :height 0.85 :v-adjust -0.05 :face 'all-the-icons-purple))
+                 (Constructor . ,(all-the-icons-faicon "cube" :height 0.85 :v-adjust -0.05 :face 'all-the-icons-purple))
+                 (Field . ,(all-the-icons-octicon "tag" :height 0.85 :v-adjust 0 :face 'all-the-icons-lblue))
+                 (Variable . ,(all-the-icons-octicon "tag" :height 0.85 :v-adjust 0 :face 'all-the-icons-lblue))
+                 (Class . ,(all-the-icons-material "settings_input_component" :height 0.9 :v-adjust -0.2 :face 'all-the-icons-orange))
+                 (Interface . ,(all-the-icons-material "share" :height 0.9 :v-adjust -0.2 :face 'all-the-icons-lblue))
+                 (Module . ,(all-the-icons-material "view_module" :height 0.9 :v-adjust -0.2 :face 'all-the-icons-lblue))
+                 (Property . ,(all-the-icons-faicon "wrench" :height 0.85 :v-adjust -0.05))
+                 (Unit . ,(all-the-icons-material "settings_system_daydream" :height 0.9 :v-adjust -0.2))
+                 (Value . ,(all-the-icons-material "format_align_right" :height 0.9 :v-adjust -0.2 :face 'all-the-icons-lblue))
+                 (Enum . ,(all-the-icons-material "storage" :height 0.9 :v-adjust -0.2 :face 'all-the-icons-orange))
+                 (Keyword . ,(all-the-icons-material "filter_center_focus" :height 0.9 :v-adjust -0.2))
+                 (Snippet . ,(all-the-icons-material "format_align_center" :height 0.9 :v-adjust -0.2))
+                 (Color . ,(all-the-icons-material "palette" :height 0.9 :v-adjust -0.2))
+                 (File . ,(all-the-icons-faicon "file-o" :height 0.9 :v-adjust -0.05))
+                 (Reference . ,(all-the-icons-material "collections_bookmark" :height 0.9 :v-adjust -0.2))
+                 (Folder . ,(all-the-icons-faicon "folder-open" :height 0.9 :v-adjust -0.05))
+                 (EnumMember . ,(all-the-icons-material "format_align_right" :height 0.9 :v-adjust -0.2 :face 'all-the-icons-lblue))
+                 (Constant . ,(all-the-icons-faicon "square-o" :height 0.9 :v-adjust -0.05))
+                 (Struct . ,(all-the-icons-material "settings_input_component" :height 0.9 :v-adjust -0.2 :face 'all-the-icons-orange))
+                 (Event . ,(all-the-icons-faicon "bolt" :height 0.85 :v-adjust -0.05 :face 'all-the-icons-orange))
+                 (Operator . ,(all-the-icons-material "control_point" :height 0.9 :v-adjust -0.2))
+                 (TypeParameter . ,(all-the-icons-faicon "arrows" :height 0.85 :v-adjust -0.05))
+                 (Template . ,(all-the-icons-material "format_align_center" :height 0.9 :v-adjust -0.2)))
+               company-box-icons-alist 'company-box-icons-all-the-icons)))
    #+END_SRC
 ** Prettier
    #+BEGIN_SRC emacs-lisp
@@ -319,7 +360,6 @@
        :config
        (add-hook 'js2-mode-hook 'prettier-js-mode)
        (add-hook 'css-mode-hook 'prettier-js-mode)
-       (add-hook 'elm-mode-hook 'prettier-js-mode)
        (add-hook 'js-mode-hook 'prettier-js-mode)
        (add-hook 'typescript-mode-hook 'prettier-js-mode))
    #+END_SRC
@@ -329,3 +369,26 @@
        :config
        (evilnc-default-hotkeys))
    #+END_SRC
+** Language Server Protocol
+   #+BEGIN_SRC emacs-lisp
+     (use-package lsp-mode
+       :hook ((elixir-mode . lsp)
+              (elm-mode . lsp))
+       :commands lsp
+       :config
+       (setq lsp-prefer-flymake nil
+             lsp-enable-file-watchers nil))
+
+     (use-package lsp-ui
+       :config
+       (setq lsp-ui-doc-enable nil
+             lsp-ui-sideline-enable nil
+             lsp-ui-peek-enable nil
+             lsp-ui-flycheck-enable t))
+     (use-package company-lsp
+       :config
+       (push 'company-lsp company-backends))
+   #+END_SRC
+
+
+

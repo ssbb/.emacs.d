@@ -13,12 +13,18 @@
 
 (let ((gc-cons-threshold most-positive-fixnum))
 
+  (add-to-list 'load-path "~/.emacs.d/vendor/")
+  
+
   ;; Set repositories
   (require 'package)
+  
+  (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
+  
   (setq-default
    load-prefer-newer t
    package-enable-at-startup nil)
-  (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
   (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
   (package-initialize)
 
