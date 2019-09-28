@@ -10,3 +10,6 @@ projectile.cache
 /.lsp*
 /init.backup.el
 /dotemacs.el
+
+# Custom file contains only local settings like PATHs to lsp binaries, etc.
+/.custom.el

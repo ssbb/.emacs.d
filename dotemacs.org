@@ -146,7 +146,7 @@
    #+BEGIN_SRC emacs-lisp
      (use-package elixir-mode
        :config
-       (add-hook 'before-save-hook 'lsp-format-buffer))
+       (add-hook 'before-save-hook 'eglot-format))
 
      (eval-after-load "elixir-mode"
        '(defun elixir-format--mix-executable ()
@@ -157,7 +157,6 @@
      (use-package elpy
        :config
        (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-       (add-hook 'elpy-mode-hook 'flycheck-mode)
        (elpy-enable))
 
      (use-package py-autopep8
@@ -174,7 +173,9 @@
    #+END_SRC
 ** Elm
    #+BEGIN_SRC emacs-lisp
-     (use-package elm-mode)
+     (use-package elm-mode
+       :config
+       (add-hook 'before-save-hook 'eglot-format))
    #+END_SRC
 * Features
 ** Helm
@@ -275,18 +276,6 @@
      (setq show-paren-delay 0)
      (show-paren-mode 1)
    #+END_SRC
-** Linting
-   #+BEGIN_SRC emacs-lisp
-     (use-package flycheck
-       :config
-       (global-flycheck-mode))
-
-     (use-package flycheck-pos-tip
-       :after (flycheck)
-       :config
-       (with-eval-after-load 'flycheck
-         (flycheck-pos-tip-mode)))
-   #+END_SRC
 ** Snippets
    #+BEGIN_SRC emacs-lisp
      (use-package yasnippet
@@ -371,24 +360,13 @@
    #+END_SRC
 ** Language Server Protocol
    #+BEGIN_SRC emacs-lisp
-     (use-package lsp-mode
-       :hook ((elixir-mode . lsp)
-              (elm-mode . lsp))
-       :commands lsp
-       :config
-       (setq lsp-prefer-flymake nil
-             lsp-enable-file-watchers nil))
-
-     (use-package lsp-ui
-       :config
-       (setq lsp-ui-doc-enable nil
-             lsp-ui-sideline-enable nil
-             lsp-ui-peek-enable nil
-             lsp-ui-flycheck-enable t))
-     (use-package company-lsp
-       :config
-       (push 'company-lsp company-backends))
+     (use-package eglot
+       :hook ((elixir-mode . eglot-ensure)
+              (elm-mode . eglot-ensure)))
    #+END_SRC
-
-
-
+** Highlight TODO's
+   #+BEGIN_SRC emacs-lisp
+     (use-package hl-todo
+       :config
+       (global-hl-todo-mode))
+   #+END_SRC
