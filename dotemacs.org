@@ -370,3 +370,8 @@
        :config
        (global-hl-todo-mode))
    #+END_SRC
+** Linting
+   #+BEGIN_SRC emacs-lisp
+     (define-key flymake-mode-map (kbd "M-n") 'flymake-goto-next-error)
+     (define-key flymake-mode-map (kbd "M-p") 'flymake-goto-prev-error)
+   #+END_SRC
