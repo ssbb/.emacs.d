@@ -19,8 +19,6 @@
   ;; Set repositories
   (require 'package)
   
-  (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
-  
   (setq-default
    load-prefer-newer t
    package-enable-at-startup nil)

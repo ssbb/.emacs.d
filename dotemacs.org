@@ -146,7 +146,7 @@
    #+BEGIN_SRC emacs-lisp
      (use-package elixir-mode
        :config
-       (add-hook 'before-save-hook 'eglot-format))
+       (add-hook 'before-save-hook 'lsp-format-buffer))
 
      (eval-after-load "elixir-mode"
        '(defun elixir-format--mix-executable ()
@@ -174,8 +174,7 @@
 ** Elm
    #+BEGIN_SRC emacs-lisp
      (use-package elm-mode
-       :config
-       (add-hook 'before-save-hook 'eglot-format))
+       :hook (elm-mode . elm-format-on-save-mode))
    #+END_SRC
 * Features
 ** Helm
@@ -288,6 +287,8 @@
 ** Auto-completion
    #+BEGIN_SRC emacs-lisp
      (use-package company
+       :hook ((elixir-mode . company-mode)
+              (elm-mode . company-mode))
        :custom
        (company-tooltip-align-annotations t)
        :bind
@@ -360,9 +361,15 @@
    #+END_SRC
 ** Language Server Protocol
    #+BEGIN_SRC emacs-lisp
-     (use-package eglot
-       :hook ((elixir-mode . eglot-ensure)
-              (elm-mode . eglot-ensure)))
+     (use-package lsp-mode
+       :hook (elixir-mode . lsp)
+       :config
+       (setq lsp-enable-file-watchers nil))
+
+     (use-package company-lsp	
+       :config
+       (push 'company-lsp company-backends)
+       (setq company-lsp-cache-candidates 'auto))
    #+END_SRC
 ** Highlight TODO's
    #+BEGIN_SRC emacs-lisp
@@ -372,6 +379,11 @@
    #+END_SRC
 ** Linting
    #+BEGIN_SRC emacs-lisp
-     (define-key flymake-mode-map (kbd "M-n") 'flymake-goto-next-error)
-     (define-key flymake-mode-map (kbd "M-p") 'flymake-goto-prev-error)
+     (use-package flycheck
+       :config
+       (global-flycheck-mode))
+
+     (use-package flycheck-elm
+       :after flycheck
+       :hook (flycheck-mode . flycheck-elm-setup))
    #+END_SRC
