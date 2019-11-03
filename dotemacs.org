@@ -146,11 +146,13 @@
    #+BEGIN_SRC emacs-lisp
      (use-package elixir-mode
        :config
-       (add-hook 'before-save-hook 'lsp-format-buffer))
+       (add-hook 'elixir-mode-hook
+                 (lambda ()
+                   (add-hook 'before-save-hook 'lsp-format-buffer nil 'make-it-local)))
 
-     (eval-after-load "elixir-mode"
-       '(defun elixir-format--mix-executable ()
-          (string-trim-right (shell-command-to-string "asdf which mix"))))
+       (eval-after-load "elixir-mode"
+         '(defun elixir-format--mix-executable ()
+            (string-trim-right (shell-command-to-string "asdf which mix")))))
    #+END_SRC
 ** Python
    #+BEGIN_SRC emacs-lisp
@@ -287,8 +289,7 @@
 ** Auto-completion
    #+BEGIN_SRC emacs-lisp
      (use-package company
-       :hook ((elixir-mode . company-mode)
-              (elm-mode . company-mode))
+       :hook (elixir-mode . company-mode)
        :custom
        (company-tooltip-align-annotations t)
        :bind
@@ -364,12 +365,21 @@
      (use-package lsp-mode
        :hook (elixir-mode . lsp)
        :config
-       (setq lsp-enable-file-watchers nil))
+       (setq lsp-enable-file-watchers nil
+             lsp-prefer-flymake nil))
 
-     (use-package company-lsp	
+     (use-package lsp-ui
        :config
-       (push 'company-lsp company-backends)
-       (setq company-lsp-cache-candidates 'auto))
+       (setq lsp-ui-flycheck-enable t
+             lsp-ui-peek-enable nil
+             lsp-ui-sideline-enable nil
+             lsp-ui-doc-enable nil
+             lsp-ui-imenu-enable nil))
+
+       (use-package company-lsp
+         :config
+         (push 'company-lsp company-backends)
+         (setq company-lsp-cache-candidates 'auto))
    #+END_SRC
 ** Highlight TODO's
    #+BEGIN_SRC emacs-lisp
@@ -387,3 +397,11 @@
        :after flycheck
        :hook (flycheck-mode . flycheck-elm-setup))
    #+END_SRC
+** Colors highlight
+#+BEGIN_SRC emacs-lisp
+(use-package rainbow-mode)
+#+END_SRC
+** Strip useless whitespaces on save
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'before-save-hook 'delete-trailing-whitespace)
+#+END_SRC

@@ -13,3 +13,5 @@ projectile.cache
 
 # Custom file contains only local settings like PATHs to lsp binaries, etc.
 /.custom.el
+
+/elpy
