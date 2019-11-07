@@ -176,7 +176,10 @@
 ** Elm
    #+BEGIN_SRC emacs-lisp
      (use-package elm-mode
-       :hook (elm-mode . elm-format-on-save-mode))
+       :config
+       (add-hook 'elm-mode-hook
+                 (lambda ()
+                   (add-hook 'before-save-hook 'lsp-format-buffer nil 'make-it-local))))
    #+END_SRC
 * Features
 ** Helm
@@ -363,23 +366,19 @@
 ** Language Server Protocol
    #+BEGIN_SRC emacs-lisp
      (use-package lsp-mode
-       :hook (elixir-mode . lsp)
+       :hook ((elixir-mode . lsp))
+              ;; (elm-mode . lsp))
        :config
        (setq lsp-enable-file-watchers nil
-             lsp-prefer-flymake nil))
+             lsp-enable-imenu t
+             ;; lsp-print-performance t
+             lsp-prefer-flymake t
+             lsp-elm-elm-analyse-trigger 'never))
 
-     (use-package lsp-ui
+     (use-package company-lsp
        :config
-       (setq lsp-ui-flycheck-enable t
-             lsp-ui-peek-enable nil
-             lsp-ui-sideline-enable nil
-             lsp-ui-doc-enable nil
-             lsp-ui-imenu-enable nil))
-
-       (use-package company-lsp
-         :config
-         (push 'company-lsp company-backends)
-         (setq company-lsp-cache-candidates 'auto))
+       (push 'company-lsp company-backends)
+       (setq company-lsp-cache-candidates 'auto))
    #+END_SRC
 ** Highlight TODO's
    #+BEGIN_SRC emacs-lisp
@@ -389,19 +388,13 @@
    #+END_SRC
 ** Linting
    #+BEGIN_SRC emacs-lisp
-     (use-package flycheck
-       :config
-       (global-flycheck-mode))
-
-     (use-package flycheck-elm
-       :after flycheck
-       :hook (flycheck-mode . flycheck-elm-setup))
+     (global-set-key (kbd "C-c ! n") 'flymake-goto-next-error)
    #+END_SRC
 ** Colors highlight
-#+BEGIN_SRC emacs-lisp
-(use-package rainbow-mode)
-#+END_SRC
+   #+BEGIN_SRC emacs-lisp
+     (use-package rainbow-mode)
+   #+END_SRC
 ** Strip useless whitespaces on save
-#+BEGIN_SRC emacs-lisp
-  (add-hook 'before-save-hook 'delete-trailing-whitespace)
-#+END_SRC
+   #+BEGIN_SRC emacs-lisp
+     (add-hook 'before-save-hook 'delete-trailing-whitespace)
+   #+END_SRC
